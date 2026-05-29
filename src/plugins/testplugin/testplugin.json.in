@@ -1,0 +1,11 @@
+{
+    "Name": "TestPlugin",
+    "Version": "$$QTCREATOR_VERSION",
+    "CompatVersion": "$$QTCREATOR_COMPAT_VERSION",
+    "Vendor": "MyIDE",
+    "Copyright": "(C) 2026 MyIDE",
+    "License": "MIT",
+    "Description": "Integration test plugin: verifies ExtensionSystem, Utils, Aggregation, AdvancedDockingSystem, KSyntaxHighlighting, 3rd_cplusplus are all linked correctly.",
+    "Url": "https://github.com/myide/myide",
+    "Category": "Test"
+}

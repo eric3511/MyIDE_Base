@@ -1492,7 +1492,12 @@ class LockFile
 public:
     static QString filePath(PluginManagerPrivate *pm)
     {
-        return QFileInfo(pm->settings->fileName()).absolutePath() + '/'
+        QString basePath;
+        if (pm->settings)
+            basePath = QFileInfo(pm->settings->fileName()).absolutePath();
+        else
+            basePath = QDir::tempPath();
+        return basePath + '/'
                + QCoreApplication::applicationName() + '.'
                + QCryptographicHash::hash(QCoreApplication::applicationDirPath().toUtf8(),
                                           QCryptographicHash::Sha1)

@@ -1,4 +1,4 @@
-add_library(app_version INTERFACE)
+﻿add_library(app_version INTERFACE)
 target_include_directories(app_version
   INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -13,9 +13,8 @@ target_include_directories(app_version
 #谁链接了 app_version，谁就能使用这些 include 路径。
 
 add_subdirectory(libs)
-
-#add_subdirectory(plugins)
-#add_subdirectory(app)
+add_subdirectory(plugins)
+add_subdirectory(app)
 #add_subdirectory(tools)
 
 
