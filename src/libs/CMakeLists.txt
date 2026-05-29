@@ -14,28 +14,39 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(qwindowkit)
 
 # ==========================================
-# 配置 Install 规则 (完整版)
+# 配置 Install 规则
 # ==========================================
 
-# 1. 把截图里出现的所有库的 Target 名字都加上
-set(EXPORT_TARGETS
+# Internal project targets (no CMAKE_DEBUG_POSTFIX)
+set(INTERNAL_TARGETS
     Utils
     ExtensionSystem
     Aggregation
-    QWKCore
-    QWKWidgets
     AdvancedDockingSystem
     KSyntaxHighlighting
     3rd_cplusplus
 )
 
-# 导出二进制文件 (.dll, .lib, .so)
-install(TARGETS ${EXPORT_TARGETS}
-    EXPORT MyIDESDKTargets
+install(TARGETS ${INTERNAL_TARGETS}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )
+
+# QWindowKit sets CMAKE_DEBUG_POSTFIX=d in its own scope, so Debug
+# artifacts are QWKCored.dll / QWKCored.lib. install(TARGETS) does not
+# reliably pick up the cross-scope debug postfix, so use explicit paths.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(_qwk_dll_suffix "d")
+else()
+    set(_qwk_dll_suffix "")
+endif()
+foreach(_qwk_target QWKCore QWKWidgets)
+    set(_qwk_dll "${_qwk_target}${_qwk_dll_suffix}.dll")
+    set(_qwk_lib "${_qwk_target}${_qwk_dll_suffix}.lib")
+    install(FILES "${CMAKE_BINARY_DIR}/bin/${_qwk_dll}"  DESTINATION bin)
+    install(FILES "${CMAKE_BINARY_DIR}/lib/${_qwk_lib}"  DESTINATION lib)
+endforeach()
 
 # ==========================================
 # 2. 导出头文件 (必须把新增库的头文件也导出去，否则别人没法 include)

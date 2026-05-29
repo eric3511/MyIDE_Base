@@ -64,10 +64,11 @@ function Invoke-Configure {
     if ($BuildType -notin @("Debug", "Release")) {
         throw "Invalid BuildType: '$BuildType'. Must be Debug or Release."
     }
-    Write-Host "  Configuring $BuildType ..."
-    cmake -S $projectRoot -B $BuildDir -G Ninja `
-        -DCMAKE_BUILD_TYPE=$BuildType `
-        -DCMAKE_PREFIX_PATH="$QtDir"
+    Write-Host "  Configuring $BuildType (Qt: $QtDir) ..."
+    & cmake -S $projectRoot -B $BuildDir -G Ninja @(
+        "-DCMAKE_BUILD_TYPE=$BuildType",
+        "-DCMAKE_PREFIX_PATH=$QtDir"
+    )
     if ($LASTEXITCODE -ne 0) { throw "CMake configure failed for $BuildType" }
 }
 
