@@ -1,0 +1,11 @@
+{
+    "Name": "TestPlugin",
+    "Version": "@IDE_VERSION@",
+    "CompatVersion": "@IDE_VERSION_COMPAT@",
+    "Vendor": "MyIDE",
+    "Copyright": "(C) 2026 MyIDE",
+    "License": "MIT",
+    "Description": "Demo plugin: verifies ExtensionSystem, Utils, Aggregation, AdvancedDockingSystem, KSyntaxHighlighting, 3rd_cplusplus are all linked correctly.",
+    "Url": "https://github.com/myide/myide",
+    "Category": "Demo"
+}
