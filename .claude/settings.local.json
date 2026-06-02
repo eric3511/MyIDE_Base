@@ -82,7 +82,25 @@
       "Bash(\"C:/Program Files/CMake/bin/cmake.exe\" -S D:/ide_base -B \"D:/ide_base/build/Desktop_Qt_6_8_3_MSVC2022_64bit-Release\" -G Ninja -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_COLOR_DIAGNOSTICS:BOOL=ON -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_PREFIX_PATH:PATH=\"C:/Qt/6.8.3/msvc2022_64\")",
       "Bash(\"C:/Program Files/CMake/bin/cmake.exe\" -S D:/ide_base -B \"D:/ide_base/build/Desktop_Qt_6_8_3_MSVC2022_64bit-Release\" -DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=\"D:/ide_base/build/Desktop_Qt_6_8_3_MSVC2022_64bit-Release/.qtcreator/cmake-helper/qtcreator-project.cmake\" -DQT_CREATOR_ENABLE_MAINTENANCE_TOOL_PROVIDER:BOOL=ON -DQT_CREATOR_ENABLE_PACKAGE_MANAGER_SETUP:BOOL=ON -DQT_MAINTENANCE_TOOL:FILEPATH=\"C:/Qt/MaintenanceTool.exe\" -DQT_QMAKE_EXECUTABLE:FILEPATH=\"C:/Qt/6.8.3/msvc2022_64/bin/qmake.exe\")",
       "Bash(git commit *)",
-      "Bash(ninja -j1 testplugin/TestPlugin.dll)"
+      "Bash(ninja -j1 testplugin/TestPlugin.dll)",
+      "Bash(where cmake *)",
+      "Bash(where ninja *)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Bash(rm -rf build-msvc)",
+      "Bash(IDELIB_DIR=\"D:/IDElib/Debug\" cmake -B build-msvc -S . -G \"Ninja\" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=\"D:/IDElib/Debug;C:/Qt/6.8.3/msvc2022_64\")",
+      "Bash(taskkill //F //IM MyIDE.exe)",
+      "Bash(PATH=C:/Qt/6.8.3/msvc2022_64/bin:__TRACKED_VAR__ QT_QPA_PLATFORM_PLUGIN_PATH=C:/Qt/6.8.3/msvc2022_64/plugins/platforms QT_QPA_PLATFORM=minimal ./MyIDE.exe)",
+      "Bash(PATH=C:/Qt/6.8.3/msvc2022_64/bin:__TRACKED_VAR__ QT_QPA_PLATFORM_PLUGIN_PATH=C:/Qt/6.8.3/msvc2022_64/plugins/platforms QT_QPA_PLATFORM=minimal QT_LOGGING_RULES=*=true timeout 4 ./MyIDE.exe)",
+      "Bash(echo \"---exit $?---\")",
+      "Bash(PATH=C:/Qt/6.8.3/msvc2022_64/bin:__TRACKED_VAR__ QT_QPA_PLATFORM_PLUGIN_PATH=C:/Qt/6.8.3/msvc2022_64/plugins/platforms QT_QPA_PLATFORM=minimal QT_DEBUG_PLUGINS=1 timeout 3 ./MyIDE.exe)",
+      "Bash(echo \"exit=$?\")",
+      "Read(//tmp/**)",
+      "Bash(cp D:/IDElib/Debug/bin/KSyntaxHighlighting.dll D:/ide_base/demo/build-msvc/app/)",
+      "Bash(cp D:/IDElib/Debug/bin/3rd_cplusplus.dll D:/ide_base/demo/build-msvc/app/)",
+      "Bash(taskkill //F //IM TestPlugin.exe)",
+      "Bash(grep -A2 \"POST_BUILD.*MyIDE\\\\|build app\\\\\\\\\\\\\\\\MyIDE.exe\" D:/ide_base/demo/build-msvc/build.ninja)",
+      "Bash(\"C:/Program Files/CMake/bin/cmake.exe\" --build .)"
     ]
   }
 }

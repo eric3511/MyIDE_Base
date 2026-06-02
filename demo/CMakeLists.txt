@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+﻿ cmake_minimum_required(VERSION 3.16)
 
 # ============================================================================
 # IDE 基座 Demo 工程 — 演示如何基于 MyIDE 基座库构建应用与插件

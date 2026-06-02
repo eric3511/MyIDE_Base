@@ -58,16 +58,22 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 #    - 传 subdir:   INTERFACE_INCLUDE_DIRECTORIES = IDElib/include/<subdir>
 # ============================================================================
 macro(import_idelib name)
+    # 第 2 个位置参数：include 子目录（可选）
+    # 第 3 个位置参数：debug postfix（可选，缺省为空）
+    set(_suffix "")
+    if(${ARGC} GREATER 2)
+        set(_suffix "${ARGV2}")
+    endif()
     if(${ARGC} GREATER 1)
-        set(_inc_dir "${IDELIB_INCLUDE_DIR}/${ARGN}")
+        set(_inc_dir "${IDELIB_INCLUDE_DIR}/${ARGV1}")
     else()
         set(_inc_dir "${IDELIB_INCLUDE_DIR}")
     endif()
     add_library(${name} SHARED IMPORTED)
     set_target_properties(${name} PROPERTIES
-        IMPORTED_LOCATION               "${IDELIB_BIN_DIR}/${name}.dll"
-        IMPORTED_IMPLIB                 "${IDELIB_LIB_DIR}/${name}.lib"
-        INTERFACE_INCLUDE_DIRECTORIES   "${_inc_dir}"
+        IMPORTED_LOCATION             "${IDELIB_BIN_DIR}/${name}${_suffix}.dll"
+        IMPORTED_IMPLIB               "${IDELIB_LIB_DIR}/${name}${_suffix}.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${_inc_dir}"
     )
 endmacro()
 
@@ -76,11 +82,22 @@ import_idelib(Utils)
 import_idelib(Aggregation)
 import_idelib(AdvancedDockingSystem)
 
+# QWindowKit debug postfix 与主项目 src/libs/CMakeLists.txt 对齐
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(_qwk_suffix "d")
+else()
+    set(_qwk_suffix "")
+endif()
+import_idelib(QWKCore     qwindowkit  ${_qwk_suffix})
+import_idelib(QWKWidgets  qwindowkit  ${_qwk_suffix})
+
 # ============================================================================
 # 4. 构建 MyIDE 可执行文件
 # ============================================================================
 add_executable(MyIDE
     main.cpp
+    mywindow.h
+    mywindow.cpp
 )
 
 target_link_libraries(MyIDE PRIVATE
@@ -88,6 +105,8 @@ target_link_libraries(MyIDE PRIVATE
     Utils
     Aggregation
     AdvancedDockingSystem
+    QWKCore
+    QWKWidgets
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
@@ -101,24 +120,27 @@ set(_runtime_dlls
     Utils.dll
     Aggregation.dll
     AdvancedDockingSystem.dll
+    QWKCore${_qwk_suffix}.dll
+    QWKWidgets${_qwk_suffix}.dll
 )
 
+set(_post_build_cmds
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        "$<TARGET_FILE_DIR:MyIDE>/plugins"
+)
 foreach(_dll IN LISTS _runtime_dlls)
-    add_custom_command(TARGET MyIDE POST_BUILD
+    list(APPEND _post_build_cmds
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${IDELIB_BIN_DIR}/${_dll}"
             "$<TARGET_FILE_DIR:MyIDE>"
     )
 endforeach()
 
-# 如果 TestPlugin 也在 demo 工程中构建，将其 DLL 复制到 app 的 plugins/ 目录
-# (使用顶层 demo/CMakeLists.txt 一起构建时，TestPlugin target 会先生成)
-if(TARGET TestPlugin)
-    add_custom_command(TARGET MyIDE POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-            "$<TARGET_FILE_DIR:MyIDE>/plugins"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_FILE:TestPlugin>"
-            "$<TARGET_FILE_DIR:MyIDE>/plugins/"
-    )
-endif()
+# TestPlugin.dll 及其额外依赖的复制由 testplugin/CMakeLists.txt 在自己的
+# POST_BUILD 阶段完成 (那里 if(TARGET MyIDE) 能正确求值为 true)
+
+# 注意: Ninja 生成器只保留同一 target 的第一个 add_custom_command(POST_BUILD),
+# 所有 post-build 操作必须合并到一个 add_custom_command 里
+add_custom_command(TARGET MyIDE POST_BUILD
+    ${_post_build_cmds}
+)
