@@ -21,6 +21,10 @@ MyMainWindow::MyMainWindow(QWidget *parent) : QWidget(parent) {
 
     setupUi();
     installWindowAgent();
+    // ICore 注册由 main.cpp 在插件加载后完成 (PR-1 步骤8 App 集成):
+    //   Core::ICore::setMainWindow(mywindow);
+    //   Core::ICore::setMenuBar(mywindow->menuBar());
+    //   ...
 }
 
 MyMainWindow::~MyMainWindow() = default;
@@ -47,6 +51,29 @@ void MyMainWindow::setCentralWidget(QWidget *w) {
 
     if (w)
         layout->addWidget(w);
+}
+
+void MyMainWindow::replaceMenuBar(QMenuBar *menuBar) {
+    if (!menuBar || menuBar == m_menuBar)
+        return;
+    auto *titleLayout = qobject_cast<QHBoxLayout *>(m_titleBar->layout());
+    if (!titleLayout)
+        return;
+    const int idx = titleLayout->indexOf(m_menuBar);
+    if (idx < 0)
+        return;
+    titleLayout->removeWidget(m_menuBar);
+    m_menuBar->hide();
+    m_menuBar->deleteLater();
+
+    m_menuBar = menuBar;
+    m_menuBar->setParent(m_titleBar);
+    titleLayout->insertWidget(idx, m_menuBar);
+
+    // QWK: 菜单栏区域要响应自己的 hover/click, 不能被认为是拖动区
+    if (m_windowAgent)
+        m_windowAgent->setHitTestVisible(m_menuBar);
+    // ICore::setMenuBar(m_menuBar) 由 main.cpp 在 replaceMenuBar 之后调用.
 }
 
 void MyMainWindow::setupUi() {
@@ -127,6 +154,15 @@ void MyMainWindow::setupUi() {
     // centralLayout->setContentsMargins(0, 0, 0, 0);
     // centralLayout->setSpacing(0);
 
+    // ---- 4b. 左侧模式栏容器 (供 ModeBarAdapter 挂 IMode 按钮) ----
+    m_modeBarContainer = new QWidget(this);
+    m_modeBarContainer->setObjectName(QStringLiteral("mode-bar-container"));
+    m_modeBarContainer->setFixedWidth(48);
+    auto *modeBarLayout = new QVBoxLayout(m_modeBarContainer);
+    modeBarLayout->setContentsMargins(0, 4, 0, 4);
+    modeBarLayout->setSpacing(2);
+    modeBarLayout->addStretch();
+
     // ---- 5. 状态栏 ----
     m_statusBar = new QStatusBar(this);
     m_statusBar->setObjectName(QStringLiteral("status-bar"));
@@ -135,13 +171,19 @@ void MyMainWindow::setupUi() {
     m_statusLabel->setText(tr("QWK ready - drag the title bar to move"));
     m_statusBar->addWidget(m_statusLabel);
 
-    // ---- 6. 主布局: 标题栏 + 中央 + 状态栏 ----
+    // ---- 6. 主布局: 标题栏 + (模式栏 | 中央) + 状态栏 ----
     // 用 QVBoxLayout (而非 QMainWindow::setMenuWidget) 让 QWK 完整控制标题栏
+    auto *bodyLayout = new QHBoxLayout;
+    bodyLayout->setContentsMargins(0, 0, 0, 0);
+    bodyLayout->setSpacing(0);
+    bodyLayout->addWidget(m_modeBarContainer);
+    bodyLayout->addWidget(m_centralContainer, 1);
+
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
     mainLayout->addWidget(m_titleBar);
-    mainLayout->addWidget(m_centralContainer, 1);
+    mainLayout->addLayout(bodyLayout, 1);
     mainLayout->addWidget(m_statusBar);
 }
 

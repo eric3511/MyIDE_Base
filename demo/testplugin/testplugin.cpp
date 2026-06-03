@@ -21,6 +21,15 @@
 #include <advanceddockingsystem/DockWidget.h>
 #include <advanceddockingsystem/DockAreaWidget.h>
 
+// Core
+#include <coreplugin/actionmanager/actionmanager.h>
+#include <coreplugin/actionmanager/actioncontainer.h>
+#include <coreplugin/actionmanager/command.h>
+#include <coreplugin/coreconstants.h>
+#include <coreplugin/icore.h>
+#include <coreplugin/imode.h>
+#include <coreplugin/modemanager.h>
+
 
 // KSyntaxHighlighting
 #include <KSyntaxHighlighting/Repository>
@@ -34,15 +43,49 @@
 #include <cplusplus/TranslationUnit.h>
 #include <cplusplus/Literals.h>
 
+#include <QApplication>
 #include <QDebug>
 #include <QMessageBox>
 #include <QLabel>
+#include <QPlainTextEdit>
+#include <QStyle>
 #include <QTextEdit>
+#include <QToolBar>
 #include <QVBoxLayout>
 #include <QPushButton>
 
 using namespace ExtensionSystem;
 using namespace Utils;
+
+// ============================================================================
+// TestMode — minimal IMode subclass. The host's ModeBarAdapter will pick this
+// up from ModeManager::modes() and add a button to the left mode bar; the
+// mode's widget will be stacked into the central container.
+// ============================================================================
+class TestMode : public Core::IMode
+{
+public:
+    explicit TestMode(QObject *parent = nullptr)
+        : Core::IMode(parent)
+    {
+        setId(Utils::Id::fromString("TestPlugin.Mode"));
+        setDisplayName(tr("Test"));
+        setIcon(QApplication::style()->standardIcon(QStyle::SP_FileDialogContentsView));
+        setPriority(50);
+        auto *w = new QWidget;
+        auto *layout = new QVBoxLayout(w);
+        layout->setContentsMargins(12, 12, 12, 12);
+        auto *label = new QLabel(tr("Test Mode Active\n\n"
+                                   "This widget is hosted by Core::IMode and is "
+                                   "swapped in/out of the central container by "
+                                   "ModeBarAdapter when you click the mode button."),
+                                w);
+        label->setAlignment(Qt::AlignCenter);
+        label->setStyleSheet("QLabel { font-size: 14px; color: #4a90e2; }");
+        layout->addWidget(label);
+        setWidget(w);
+    }
+};
 
 TestPlugin::TestPlugin() = default;
 TestPlugin::~TestPlugin() = default;
@@ -140,8 +183,7 @@ bool TestPlugin::initialize(const QStringList &arguments, QString *errorString)
     if (parser.parseTranslationUnit(ast)) {
         qDebug() << "[TestPlugin] CPlusplus parser: translation unit parsed successfully";
     }
-
-    // --- Build status report ---
+    qDebug() << "[TestPlugin] step 7: build status report";
     QStringList libsOk;
     libsOk << "ExtensionSystem"
            << "Utils"
@@ -153,11 +195,23 @@ bool TestPlugin::initialize(const QStringList &arguments, QString *errorString)
     statusLabel->setText("All libraries verified:\n" + libsOk.join("\n"));
 
     // --- Setup dock ---
+    qDebug() << "[TestPlugin] step 8: setting up dock";
     dockWidget->setWidget(centralWidget);
     dockManager->setCentralWidget(dockWidget);
 
     // Register dock manager so other plugins can find it
     pm->addObject(dockManager);
+    qDebug() << "[TestPlugin] step 9: dock registered";
+
+    // --- 7. ActionManager smoke (deferred — see PR-1 follow-up for full
+    //     menu/menubar integration). Just verify ICore is reachable. ---
+    qDebug() << "[TestPlugin] step 10: ICore::instance =" << Core::ICore::instance();
+
+    // --- 8. Core::IMode — register a test mode that surfaces a status widget ---
+    qDebug() << "[TestPlugin] step 11: creating TestMode";
+    auto *testMode = new TestMode(this);
+    Q_UNUSED(testMode);
+    qDebug() << "[TestPlugin] Registered IMode 'TestMode' — will appear in mode bar";
 
     qDebug() << "[TestPlugin] All" << libsOk.size() << "libraries verified successfully.";
 

@@ -36,6 +36,20 @@ public:
     // 模拟 QMainWindow::setCentralWidget 的接口, 方便 main.cpp 调用
     void setCentralWidget(QWidget *w);
 
+    // --- 新主窗口契约 (供 ICore / ActionManager / 适配器使用) ---
+    // 标题栏中的菜单栏 (ActionManager 的 MENU_BAR 容器挂在这里)
+    QMenuBar *menuBar() const { return m_menuBar; }
+    // 底部状态栏 (StatusBarManager / ProgressView 用)
+    QStatusBar *statusBar() const { return m_statusBar; }
+    // 中央内容容器 (ADS CDockManager 挂在这里)
+    QWidget *centralContainer() const { return m_centralContainer; }
+    // 左侧模式栏容器 (ModeBarAdapter 把 IMode 按钮添加到这里)
+    QWidget *modeBarContainer() const { return m_modeBarContainer; }
+
+    // 把 AM 创建的菜单栏替换掉 setupUi() 中的占位菜单栏.
+    // 在 ActionManager::createMenuBar(MENU_BAR) 后由 host 调用.
+    void replaceMenuBar(QMenuBar *menuBar);
+
 public slots:
     void toggleTheme();
 
@@ -57,6 +71,7 @@ private:
     QPushButton *m_closeButton = nullptr;
 
     QWidget *m_centralContainer = nullptr;
+    QWidget *m_modeBarContainer = nullptr;
     QStatusBar *m_statusBar = nullptr;
     QLabel *m_statusLabel = nullptr;
 

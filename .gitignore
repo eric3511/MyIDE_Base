@@ -61,3 +61,5 @@ ui_*.h
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+temp/

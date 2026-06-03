@@ -1,0 +1,16 @@
+{
+    "Name" : "Core",
+    "Version" : "$$QTCREATOR_VERSION",
+    "CompatVersion" : "$$QTCREATOR_COMPAT_VERSION",
+    "Required" : true,
+    "Vendor" : "MyIDE",
+    "Copyright" : "(C) 2026 MyIDE",
+    "License" : [ "GNU General Public License Usage",
+                  "",
+                  "Alternatively, this plugin may be used under the terms of the GNU General Public License version 3 as published by the Free Software Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT included in the packaging of this plugin."
+    ],
+    "Category" : "Core",
+    "Description" : "The core plugin for MyIDE: provides ICore facade, ActionManager, ModeManager, DocumentManager, etc.",
+    "Url" : "https://github.com/myide/myide",
+    $$dependencyList
+}

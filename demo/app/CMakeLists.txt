@@ -81,6 +81,15 @@ import_idelib(ExtensionSystem)
 import_idelib(Utils)
 import_idelib(Aggregation)
 import_idelib(AdvancedDockingSystem)
+# Core is linked into the host process; Core.dll is placed alongside
+# MyIDE.exe in the unified bin/ directory. PluginManager scans this same
+# directory and recognizes Core.dll as a plugin via its embedded
+# Q_PLUGIN_METADATA, so CorePlugin::initialize() still runs through the
+# plugin lifecycle. The key invariant: there is exactly ONE Core.dll on
+# disk, so the implicit LoadLibrary done by the loader for MyIDE.exe's
+# Core import and the explicit LoadLibrary done by PluginManager resolve
+# to the same HMODULE — single shared static state.
+import_idelib(Core                  coreplugin)
 
 # QWindowKit debug postfix 与主项目 src/libs/CMakeLists.txt 对齐
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -105,6 +114,7 @@ target_link_libraries(MyIDE PRIVATE
     Utils
     Aggregation
     AdvancedDockingSystem
+    Core
     QWKCore
     QWKWidgets
     Qt6::Core
@@ -114,20 +124,22 @@ target_link_libraries(MyIDE PRIVATE
 
 # ============================================================================
 # 5. 拷贝运行时 DLL 到输出目录
+# 统一目录布局: 所有 DLL 都放在 $<TARGET_FILE_DIR:MyIDE> (= app/),
+# 没有 plugins/ 子目录. 这样 PluginManager 扫描时与 host 的隐式 LoadLibrary
+# 走同一条绝对路径, 保证 Core.dll / ExtensionSystem.dll / Utils.dll
+# 在进程内只被加载一次.
 # ============================================================================
 set(_runtime_dlls
     ExtensionSystem.dll
     Utils.dll
     Aggregation.dll
     AdvancedDockingSystem.dll
+    Core.dll
     QWKCore${_qwk_suffix}.dll
     QWKWidgets${_qwk_suffix}.dll
 )
 
-set(_post_build_cmds
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-        "$<TARGET_FILE_DIR:MyIDE>/plugins"
-)
+set(_post_build_cmds)
 foreach(_dll IN LISTS _runtime_dlls)
     list(APPEND _post_build_cmds
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
