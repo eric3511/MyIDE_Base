@@ -46,6 +46,19 @@ add_qtc_plugin(Core
     adapters/modebar_adapter.h
     adapters/modebar_adapter.cpp
 
+    # ---- PR-2 步骤1: 文档接口 (IDocument + IDocumentFactory) ----
+    idocument.h idocument.cpp
+    idocumentfactory.h idocumentfactory.cpp
+
+    # ---- PR-2 步骤2: 选项页接口 (IOptionsPage) ----
+    dialogs/ioptionspage.h
+    dialogs/ioptionspage.cpp
+
+    # ---- PR-2 步骤3: DocumentManager (脏标记 / Recent Files / 监控) ----
+    #     UI 弹窗 / EditorManager 集成留到 PR-3
+    documentmanager.h
+    documentmanager.cpp
+
     # ---- 后续步骤会逐步搬入: ----
     # PR-1 步骤2.5: coreicons.{h,cpp}, core.qrc (清理 Manhattan/Fancy 后再加)
     # PR-1 步骤3.5: commandsfile.{h,cpp} + commandmappings.{h,cpp} (需 shortcutsettings → PR-2)

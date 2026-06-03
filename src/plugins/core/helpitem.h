@@ -40,7 +40,6 @@ public:
     };
 
     HelpItem() = default;
-    explicit HelpItem(const char *helpId) : m_helpIds(QString::fromUtf8(helpId)) {}
     explicit HelpItem(const QString &helpId) : m_helpIds(helpId) {}
     HelpItem(const QString &helpId, const QString &docMark, Category category)
         : m_helpIds(helpId), m_docMark(docMark), m_category(category) {}
